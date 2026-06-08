@@ -91,10 +91,18 @@ export const NAV_GROUPS: NavGroup[] = [
 ];
 
 // 快捷新建（§3.2 QuickCreate）
-export const QUICK_CREATE = [
-  { label: '新建线索', path: '/leads', icon: UserPlus },
-  { label: '新建客户', path: '/customers', icon: Users },
-  { label: '新建商机', path: '/opportunities', icon: Briefcase },
-  { label: '新建报价', path: '/quotations', icon: Calculator },
-  { label: '新建合同', path: '/contracts', icon: Handshake },
+// entity → 打开统一新建弹窗；path → 直接跳转（报价走实时编辑器）
+import type { CreatableEntity } from '@/store/create';
+export interface QuickCreateItem {
+  label: string;
+  icon: LucideIcon;
+  entity?: CreatableEntity;
+  path?: string;
+}
+export const QUICK_CREATE: QuickCreateItem[] = [
+  { label: '新建线索', icon: UserPlus, entity: 'lead' },
+  { label: '新建客户', icon: Users, entity: 'customer' },
+  { label: '新建商机', icon: Briefcase, entity: 'opportunity' },
+  { label: '新建报价', icon: Calculator, path: '/quotations/new' },
+  { label: '新建合同', icon: Handshake, entity: 'contract' },
 ];

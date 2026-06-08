@@ -5,6 +5,7 @@ import { ArrowRight, Briefcase, Handshake, Plus, Search, Settings, User, Users }
 import { searchApi, type SearchHit } from '@/api/crm';
 import { QUICK_CREATE } from './nav';
 import { useUI } from '@/store/ui';
+import { useCreate } from '@/store/create';
 import { cn } from '@/lib/cn';
 
 const GROUP_ICON: Record<string, React.ReactNode> = {
@@ -18,6 +19,7 @@ const GROUP_ICON: Record<string, React.ReactNode> = {
 export function CommandPalette() {
   const open = useUI((s) => s.commandOpen);
   const setOpen = useUI((s) => s.setCommandOpen);
+  const openCreate = useCreate((s) => s.open);
   const [kw, setKw] = useState('');
   const navigate = useNavigate();
 
@@ -77,7 +79,16 @@ export function CommandPalette() {
           {!kw && (
             <Group title="快捷新建">
               {QUICK_CREATE.map((q) => (
-                <Row key={q.label} icon={<Plus size={15} className="text-primary" />} title={q.label} onClick={() => go(q.path)} />
+                <Row
+                  key={q.label}
+                  icon={<Plus size={15} className="text-primary" />}
+                  title={q.label}
+                  onClick={() => {
+                    setOpen(false);
+                    if (q.entity) openCreate(q.entity);
+                    else if (q.path) navigate(q.path);
+                  }}
+                />
               ))}
               <Row icon={<Settings size={15} className="text-text-weak" />} title="跳转设置" onClick={() => go('/settings')} />
             </Group>

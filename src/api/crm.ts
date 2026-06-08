@@ -28,6 +28,10 @@ import type {
   Term,
 } from '@/types';
 import { buildAiReport } from '@/mock/ai';
+import { dayjs } from '@/lib/format';
+
+const nextId = (rows: { [k: string]: any }[], key: string) =>
+  rows.reduce((m, r) => Math.max(m, Number(r[key]) || 0), 0) + 1;
 
 // ---------- 字典 §9.4 ----------
 export const termsApi = {
@@ -53,6 +57,24 @@ export const leadsApi = {
     }
     return delay(c);
   },
+  create: (input: Partial<Customer>) => {
+    const row: Customer = {
+      customerId: nextId(customers, 'customerId'),
+      organizationId: 1,
+      category: 1,
+      currentTrackingStatus: 15, // 未分配
+      trackingNum: 0,
+      approval: -1,
+      active: 1,
+      createDate: dayjs().toISOString(),
+      trackingUpdateDate: dayjs().toISOString(),
+      labels: [],
+      ...input,
+      name: input.name ?? '未命名线索',
+    } as Customer;
+    customers.unshift(row);
+    return delay(row);
+  },
 };
 
 // ---------- 客户 §6.3 ----------
@@ -73,6 +95,25 @@ export const customersApi = {
         .filter((t) => t.customerId === customerId)
         .sort((a, b) => b.createDate.localeCompare(a.createDate)),
     ),
+  create: (input: Partial<Customer>) => {
+    const row: Customer = {
+      customerId: nextId(customers, 'customerId'),
+      organizationId: 1,
+      category: 3, // 个人客户
+      currentTrackingStatus: 8, // 初访
+      trackingNum: 0,
+      opportunityCount: 0,
+      approval: -1,
+      active: 1,
+      createDate: dayjs().toISOString(),
+      trackingUpdateDate: dayjs().toISOString(),
+      labels: [],
+      ...input,
+      name: input.name ?? '未命名客户',
+    } as Customer;
+    customers.unshift(row);
+    return delay(row);
+  },
 };
 
 // ---------- 商机 §6.4 ----------
@@ -83,6 +124,31 @@ export const opportunitiesApi = {
     const o = opportunities.find((x) => x.opportunityId === id);
     if (o) o.status = status;
     return delay(o);
+  },
+  create: (input: Partial<Opportunity>) => {
+    const id = nextId(opportunities, 'opportunityId');
+    const cust = customers.find((c) => c.customerId === input.customerId);
+    const row: Opportunity = {
+      opportunityId: id,
+      code: `OPP${dayjs().format('YYYY')}${String(id).padStart(4, '0')}`,
+      estimatedAmount: '0',
+      status: 30,
+      allStayTime: 0,
+      depId: cust?.leaderId ? 2 : 2,
+      renewType: 1,
+      additional: 1,
+      approval: -1,
+      active: 1,
+      createDate: dayjs().toISOString(),
+      statusExpiryDate: dayjs().add(14, 'day').toISOString(),
+      ...input,
+      name: input.name ?? '未命名商机',
+      customerId: input.customerId ?? 0,
+      customerName: cust?.name,
+    } as Opportunity;
+    opportunities.unshift(row);
+    if (cust) cust.opportunityCount = (cust.opportunityCount ?? 0) + 1;
+    return delay(row);
   },
 };
 
@@ -106,6 +172,38 @@ export const contractsApi = {
   payments: (contractId: number) => delay(payments.filter((p) => p.contractId === contractId)),
   paymentSheets: (contractId: number) => delay(paymentSheets.filter((s) => s.contractId === contractId)),
   invoices: (contractId: number) => delay(invoices.filter((i) => i.contractId === contractId)),
+  create: (input: Partial<Contract>) => {
+    const id = nextId(contracts, 'contractId');
+    const cust = customers.find((c) => c.customerId === input.customerId);
+    const amount = input.amount ?? '0';
+    const row: Contract = {
+      contractId: id,
+      code: `HT${dayjs().format('YYYY')}${String(id).padStart(4, '0')}`,
+      contractType: 1,
+      renewType: 1,
+      currency: 'CNY',
+      status: 1, // 签约
+      receivedAmount: '0.00',
+      outstandingAmount: amount,
+      badDebtsAmount: '0.00',
+      receivedRate: '0',
+      invoiceAmount: '0.00',
+      notInvoiceAmount: amount,
+      grossProfit: '0.00',
+      cashProfit: '0.00',
+      approval: -1,
+      changeApproval: -1,
+      archive: false,
+      labels: [],
+      ...input,
+      name: input.name ?? '未命名合同',
+      customerId: input.customerId ?? 0,
+      customerName: cust?.name,
+      amount,
+    } as Contract;
+    contracts.unshift(row);
+    return delay(row);
+  },
 };
 
 // ---------- 资金 §6.7 ----------

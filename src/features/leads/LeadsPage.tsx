@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { leadsApi } from '@/api/crm';
 import { useListQuery } from '@/hooks/useListQuery';
 import { useUI } from '@/store/ui';
+import { useCreate } from '@/store/create';
 import { PageHeader, SearchInput } from '@/components/ui/PageHeader';
 import { Button, UserCell } from '@/components/ui/primitives';
 import { DataTable, type Column } from '@/components/ui/DataTable';
@@ -36,6 +37,7 @@ export function LeadsPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const toast = useUI((s) => s.toast);
+  const openCreate = useCreate((s) => s.open);
   const qc = useQueryClient();
 
   const convert = async (rows: Customer[]) => {
@@ -73,7 +75,7 @@ export function LeadsPage() {
             <SearchInput value={q.keyword} onChange={q.setKeyword} placeholder="搜索线索名称 / 行业" />
             <Button size="md"><Upload size={14} />导入</Button>
             <Button size="md"><Download size={14} />导出</Button>
-            <Button variant="primary" size="md">新建线索</Button>
+            <Button variant="primary" size="md" onClick={() => openCreate('lead')}>新建线索</Button>
           </>
         }
       />

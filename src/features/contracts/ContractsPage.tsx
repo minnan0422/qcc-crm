@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { contractsApi } from '@/api/crm';
 import { useListQuery } from '@/hooks/useListQuery';
+import { useCreate } from '@/store/create';
 import { PageHeader, SearchInput } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/primitives';
 import { DataTable, type Column } from '@/components/ui/DataTable';
@@ -32,6 +33,7 @@ const STATUS: Record<number, { label: string; kind: 'info' | 'success' | 'warnin
 export function ContractsPage() {
   const q = useListQuery<Contract>('contracts', contractsApi.list);
   const navigate = useNavigate();
+  const openCreate = useCreate((s) => s.open);
 
   const columns: Column<Contract>[] = [
     { key: 'code', header: '合同编号', render: (r) => <span className="font-medium text-primary">{r.code}</span> },
@@ -70,7 +72,7 @@ export function ContractsPage() {
         extra={
           <>
             <SearchInput value={q.keyword} onChange={q.setKeyword} placeholder="搜索合同 / 编号 / 客户" />
-            <Button variant="primary" size="md">新建合同</Button>
+            <Button variant="primary" size="md" onClick={() => openCreate('contract')}>新建合同</Button>
           </>
         }
       />

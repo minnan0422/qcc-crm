@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Bell, ChevronDown, HelpCircle, Menu, Plus, Search } from 'lucide-react';
 import { QUICK_CREATE } from './nav';
 import { useUI } from '@/store/ui';
+import { useCreate } from '@/store/create';
 import { tasksApi } from '@/api/crm';
 import { CURRENT_USER } from '@/mock/org';
 import { Avatar, CountBadge } from '@/components/ui/primitives';
@@ -14,7 +15,13 @@ export function TopBar() {
   const toggleNav = useUI((s) => s.toggleNav);
   const setCommandOpen = useUI((s) => s.setCommandOpen);
   const navigate = useNavigate();
+  const openCreate = useCreate((s) => s.open);
   const [quickOpen, setQuickOpen] = useState(false);
+
+  const runQuick = (item: (typeof QUICK_CREATE)[number]) => {
+    if (item.entity) openCreate(item.entity);
+    else if (item.path) navigate(item.path);
+  };
 
   const { data: counts } = useQuery({ queryKey: ['task-counts'], queryFn: () => tasksApi.counts() });
   const todoTotal = counts ? Object.values(counts).reduce((a, b) => a + b, 0) : 0;
@@ -59,7 +66,7 @@ export function TopBar() {
               {QUICK_CREATE.map((q) => (
                 <button
                   key={q.label}
-                  onMouseDown={() => navigate(q.path)}
+                  onMouseDown={() => runQuick(q)}
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text hover:bg-bg"
                 >
                   <q.icon size={15} className="text-text-weak" />

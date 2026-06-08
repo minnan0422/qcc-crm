@@ -4,6 +4,7 @@ import { Download, Tag, Undo2, Upload, UserCog } from 'lucide-react';
 import { customersApi } from '@/api/crm';
 import { useListQuery } from '@/hooks/useListQuery';
 import { useUI } from '@/store/ui';
+import { useCreate } from '@/store/create';
 import { PageHeader, SearchInput } from '@/components/ui/PageHeader';
 import { Button, UserCell } from '@/components/ui/primitives';
 import { DataTable, type Column } from '@/components/ui/DataTable';
@@ -34,6 +35,7 @@ export function CustomersPage() {
   const [activeView, setActiveView] = useState<string>();
   const navigate = useNavigate();
   const toast = useUI((s) => s.toast);
+  const openCreate = useCreate((s) => s.open);
 
   const columns: Column<Customer>[] = [
     { key: 'name', header: '客户名称', render: (r) => <span className="font-medium text-primary">{r.name}</span> },
@@ -60,7 +62,7 @@ export function CustomersPage() {
             <SearchInput value={q.keyword} onChange={q.setKeyword} placeholder="搜索客户名称 / 行业" />
             <Button size="md"><Upload size={14} />导入(含更新)</Button>
             <Button size="md"><Download size={14} />导出</Button>
-            <Button variant="primary" size="md">新建客户</Button>
+            <Button variant="primary" size="md" onClick={() => openCreate('customer')}>新建客户</Button>
           </>
         }
       />

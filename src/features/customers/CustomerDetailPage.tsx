@@ -23,6 +23,7 @@ import { AiPanel } from '@/components/ai/AiPanel';
 import { TableSkeleton, EmptyState } from '@/components/ui/states';
 import { DataTable, type Column } from '@/components/ui/DataTable';
 import { useUI } from '@/store/ui';
+import { useCreate } from '@/store/create';
 import { useTerm } from '@/hooks/useTerms';
 import { userName } from '@/mock/org';
 import { formatDate } from '@/lib/format';
@@ -33,6 +34,7 @@ export function CustomerDetailPage() {
   const cid = Number(id);
   const navigate = useNavigate();
   const toast = useUI((s) => s.toast);
+  const openCreate = useCreate((s) => s.open);
   const [tab, setTab] = useState('overview');
   const term = useTerm();
 
@@ -82,8 +84,8 @@ export function CustomerDetailPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button onClick={() => toast('已打开新增跟进', 'info')}><CalendarPlus size={14} />加跟进</Button>
-            <Button onClick={() => navigate('/opportunities')}><PlusCircle size={14} />建商机</Button>
-            <Button onClick={() => navigate('/quotations')}><FilePlus2 size={14} />建报价</Button>
+            <Button onClick={() => openCreate('opportunity', { customerId: cid })}><PlusCircle size={14} />建商机</Button>
+            <Button onClick={() => navigate('/quotations/new')}><FilePlus2 size={14} />建报价</Button>
             <Button onClick={() => toast('已签到', 'success')}><MapPin size={14} />签到</Button>
           </div>
         </div>

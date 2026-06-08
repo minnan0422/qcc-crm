@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Kanban, List } from 'lucide-react';
 import { opportunitiesApi } from '@/api/crm';
 import { useListQuery } from '@/hooks/useListQuery';
+import { useCreate } from '@/store/create';
 import { PageHeader, SearchInput } from '@/components/ui/PageHeader';
 import { Button, UserCell } from '@/components/ui/primitives';
 import { DataTable, type Column } from '@/components/ui/DataTable';
@@ -29,6 +30,7 @@ export function OpportunitiesPage() {
   const [views, setViews] = useState(DEFAULT_VIEWS);
   const [activeView, setActiveView] = useState<string>();
   const navigate = useNavigate();
+  const openCreate = useCreate((s) => s.open);
   const { id } = useParams();
 
   // 看板需要全量数据
@@ -69,7 +71,7 @@ export function OpportunitiesPage() {
         extra={
           <>
             <SearchInput value={q.keyword} onChange={q.setKeyword} placeholder="搜索商机 / 编号 / 客户" />
-            <Button variant="primary" size="md">新建商机</Button>
+            <Button variant="primary" size="md" onClick={() => openCreate('opportunity')}>新建商机</Button>
           </>
         }
       />
