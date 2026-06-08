@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   §4.1 Design Token（CSS 变量，禁止硬编码颜色）
+   ============================================================ */
+:root {
+  /* 主色：沿用企查查蓝，降低饱和以便长时间阅读 */
+  --color-primary: #2a6ff0;
+  --color-primary-weak: #eaf1fe;
+  --color-bg: #f6f8fa;
+  --color-surface: #ffffff;
+  --color-border: #e6e9ee;
+  --color-text: #1a2233;
+  --color-text-weak: #5b6676;
+  --color-text-faint: #97a1b0;
+  /* 语义状态 */
+  --color-success: #15b077;
+  --color-warning: #f5a623;
+  --color-danger: #e5484d;
+  --color-info: #2a6ff0;
+  /* 字号（比旧系统普遍 +1px） */
+  --font-xs: 12px;
+  --font-sm: 13px;
+  --font-md: 14px;
+  --font-lg: 16px;
+  --font-xl: 20px;
+  /* 表格密度 */
+  --row-compact: 36px;
+  --row-comfortable: 48px;
+  --radius: 8px;
+  --shadow-card: 0 1px 3px rgba(20, 30, 50, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-md);
+  font-family: Inter, system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 等宽数字（金额列右对齐用） */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d2d8e0;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b9c1cc;
+}
+
+/* 抽屉/弹层动画 */
+@keyframes drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-drawer {
+  animation: drawer-in 0.2s ease-out;
+}
+.animate-fade {
+  animation: fade-in 0.15s ease-out;
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+.skeleton {
+  background: #e9edf2;
+  border-radius: 6px;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
