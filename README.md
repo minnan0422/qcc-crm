@@ -129,6 +129,20 @@ DEPLOY_HOST=user@1.2.3.4 DEPLOY_PATH=/var/www/nextcrm ./deploy/deploy.sh
 > 接后端时：把 `deploy/nginx.conf` 中 `/api/` 反代段取消注释指向后端，并将
 > `src/api/crm.ts` 的 mock 换为真实 `fetch`。
 
+## 业务数据库（PostgreSQL）
+
+L2C 核心链路的 PostgreSQL 16 库（DDL + 种子 + 优化），详见 `docs/DATABASE.md`。
+
+```bash
+cd db && docker compose up -d        # 起 Postgres + Adminer，自动建表+导入种子
+# 或对已有库执行：
+DATABASE_URL=postgres://crm:crm@localhost:5432/nextcrm ./db/apply.sh
+```
+
+要点：34 表 / 95 索引；金额公式用 GENERATED 列固化，回款/开票额由触发器从下游回写；
+可配置枚举走 `term` 字典，固定枚举用 CHECK；名称检索用 pg_trgm GIN、标签用数组 GIN、
+催收/续约/待办用部分索引（均经 EXPLAIN 验证命中）。
+
 ## 与后端对接
 
 `src/api/client.ts` 封装了统一返回 `{ code, msg, data }` 与分页约定；

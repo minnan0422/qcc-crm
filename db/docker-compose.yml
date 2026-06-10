@@ -1,0 +1,36 @@
+# 本地起一套 Postgres + Adminer，并自动执行 migrations + seed
+# 用法：cd db && docker compose up -d
+# 连接：localhost:5432  库 nextcrm  用户/密码 crm/crm
+# Adminer：http://localhost:8081
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: crm-pg
+    environment:
+      POSTGRES_USER: crm
+      POSTGRES_PASSWORD: crm
+      POSTGRES_DB: nextcrm
+    ports:
+      - "5432:5432"
+    volumes:
+      - crm_pgdata:/var/lib/postgresql/data
+      # 容器首次初始化时，由 init.sh 依次执行 migrations 再导入 seed
+      - ./migrations:/migrations:ro
+      - ./seed.sql:/seed.sql:ro
+      - ./init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crm -d nextcrm"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  adminer:
+    image: adminer:4
+    container_name: crm-adminer
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+
+volumes:
+  crm_pgdata:
