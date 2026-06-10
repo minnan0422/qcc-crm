@@ -143,6 +143,32 @@ DATABASE_URL=postgres://crm:crm@localhost:5432/nextcrm ./db/apply.sh
 可配置枚举走 `term` 字典，固定枚举用 CHECK；名称检索用 pg_trgm GIN、标签用数组 GIN、
 催收/续约/待办用部分索引（均经 EXPLAIN 验证命中）。
 
+## 后端 API（Express + Postgres）
+
+`server/` 是按 `db/` 表结构实现的 L2C 接口层（Express + node-postgres），统一返回
+`{ code, msg, data }`，前缀 `/api/crm`。
+
+```bash
+cd server && cp .env.example .env && npm install
+npm run dev          # http://localhost:8080，/health 自检
+```
+
+前端切换到真实接口：根目录 `cp .env.example .env.local`，设置
+`VITE_API_BASE=http://localhost:8080`（不设置则用内存 Mock）。
+
+接口覆盖：terms、leads（list/get/convert/create）、customers（list/get/contacts/
+trackings/create）、opportunities（list/get/stage/create）、quotations（list/get/
+products）、contracts（list/get/payments/invoices/create）、payments/invoices/
+pre-credits（list）、products（list/all）、tasks（list/complete/counts）、targets、
+ai/generate、search。列表支持 tab/关键字/多条件筛选/排序/分页，金额与回写由数据库
+生成列 + 触发器保证。
+
+### 全栈一键启动（Postgres + 后端 + 前端同源反代）
+```bash
+docker compose -f docker-compose.full.yml up -d --build
+# 访问 http://localhost:8088（nginx 静态前端 + /api 反代到后端）
+```
+
 ## 与后端对接
 
 `src/api/client.ts` 封装了统一返回 `{ code, msg, data }` 与分页约定；

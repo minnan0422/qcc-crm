@@ -17,7 +17,11 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build
+# 传入 VITE_API_BASE（空串=同源 /api，配合 nginx 反代）→ 前端走真实后端；
+# 不传（默认哨兵 __MOCK__）→ 内存 Mock，保证单容器 docker compose up 仍可独立演示
+ARG VITE_API_BASE=__MOCK__
+RUN if [ "$VITE_API_BASE" = "__MOCK__" ]; then npm run build; \
+    else VITE_API_BASE="$VITE_API_BASE" npm run build; fi
 
 # ---- 运行阶段（nginx 静态托管）----
 FROM ${NGINX_IMAGE} AS runtime
