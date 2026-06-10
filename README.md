@@ -91,11 +91,12 @@ docker run -d -p 8080:80 --restart unless-stopped nextcrm:latest
 ```
 镜像内置 `deploy/nginx.conf`（已含 SPA history 路由回退、gzip、静态资源强缓存）。
 
-基础镜像可用 `--build-arg` 换成加速源（国内服务器 / Docker Hub 限流时）：
+基础镜像与 npm 源均可用 `--build-arg` 换成加速源（国内网络 / Docker Hub 限流时）：
 ```bash
 docker build \
   --build-arg NODE_IMAGE=mirror.gcr.io/library/node:22-alpine \
   --build-arg NGINX_IMAGE=mirror.gcr.io/library/nginx:1.27-alpine \
+  --build-arg NPM_REGISTRY=https://registry.npmmirror.com \
   -t nextcrm:latest .
 ```
 

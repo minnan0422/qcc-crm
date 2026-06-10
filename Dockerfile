@@ -8,6 +8,10 @@ ARG NGINX_IMAGE=nginx:1.27-alpine
 FROM ${NODE_IMAGE} AS build
 WORKDIR /app
 
+# npm 源可覆盖（国内网络建议：--build-arg NPM_REGISTRY=https://registry.npmmirror.com）
+ARG NPM_REGISTRY=https://registry.npmjs.org
+RUN npm config set registry "${NPM_REGISTRY}"
+
 # 优先复制依赖清单，利用层缓存
 COPY package.json package-lock.json ./
 RUN npm ci
