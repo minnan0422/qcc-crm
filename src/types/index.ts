@@ -333,6 +333,93 @@ export interface AiReport {
   createDate: string;
 }
 
+// ---- 协同模块 ----
+export interface Sign {
+  signId: number;
+  userId: number;
+  userName?: string;
+  type: 1 | 2; // 1上下班 2外勤拜访
+  customerId?: number;
+  customerName?: string;
+  address?: string;
+  longitude?: number;
+  latitude?: number;
+  remark?: string;
+  photoUrl?: string;
+  createDate: string;
+}
+
+export interface Ticket {
+  ticketId: number;
+  code: string;
+  title: string;
+  typeTerm?: number;
+  customerId?: number;
+  customerName?: string;
+  priority: 1 | 2 | 3;
+  status: 1 | 2 | 3 | 4; // 待处理/处理中/已解决/已关闭
+  assigneeId?: number;
+  assigneeName?: string;
+  creatorId?: number;
+  description?: string;
+  createDate: string;
+  updateDate?: string;
+}
+
+export interface TicketComment {
+  id: number;
+  ticketId: number;
+  userId: number;
+  userName?: string;
+  content: string;
+  createDate: string;
+}
+
+export interface ApprovalRoute {
+  routeId: number;
+  businessType: number;
+  name: string;
+  nodes: { name: string; approverIds: number[] }[];
+}
+
+export interface ApprovalTask {
+  taskId: number;
+  businessType: number;
+  businessId: number;
+  businessName?: string;
+  routeId?: number;
+  applicantId: number;
+  applicantName?: string;
+  status: 2 | 3 | 11; // 进行中/驳回/通过
+  currentNode: number;
+  nodeName?: string;
+  createDate: string;
+  nodes?: ApprovalTaskNode[];
+}
+
+export interface ApprovalTaskNode {
+  nodeIndex: number;
+  name: string;
+  approverIds: number[];
+  action: 0 | 11 | 3;
+  actedBy?: number;
+  actedByName?: string;
+  comment?: string;
+  actedAt?: string;
+}
+
+export interface QywxMessage {
+  msgId: number;
+  toUserId?: number;
+  toUserName?: string;
+  businessType?: number;
+  businessId?: number;
+  content: string;
+  channel: string;
+  status: number;
+  createDate: string;
+}
+
 export interface AiReportContent {
   summary: string;
   points: string[];

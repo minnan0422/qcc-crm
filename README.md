@@ -154,6 +154,16 @@ DATABASE_URL=postgres://crm:crm@localhost:5432/nextcrm ./db/apply.sh
 - 前端：`/login` 页 + 全局路由守卫；令牌存于 localStorage，API 请求自动附带
   `Authorization`，过期用 refresh 续期。Mock 模式同样需登录（内置演示账号）。
 
+## 令牌吊销与协同模块
+
+- **令牌吊销**：`app_user.token_version`，改密码或管理员踢人时 +1，旧 JWT 立即失效。
+  用户菜单「修改密码」（其它设备需重新登录）；管理员 `POST /api/auth/kick/:userId`（需 scope=4 角色）。
+- **外勤签到**（`/sign`）：上下班/外勤打卡 + 浏览器定位，个人/团队视图。
+- **工单**（`/tickets`）：受理→处理中→解决→关闭，处理记录评论，指派即推送企微通知。
+- **审批流**（`/approvals`）：可配置多级路由（`work_flow_route`），发起→逐级审批→结果回写
+  单据 `approval` 列（报价/合同/发票/预授信/商机），待我审批/我发起的；报价单「提交审批」已接入。
+- **企微协同**（`/qywx`）：审批/工单等通知推送企业微信（未配置凭据时落库留痕），含消息记录与测试发送。
+
 ## 后端 API（Express + Postgres）
 
 `server/` 是按 `db/` 表结构实现的 L2C 接口层（Express + node-postgres），统一返回

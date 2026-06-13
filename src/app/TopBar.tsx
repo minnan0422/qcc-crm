@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Plus, Search } from 'lucide-react';
+import { Bell, ChevronDown, HelpCircle, KeyRound, LogOut, Menu, Plus, Search } from 'lucide-react';
 import { QUICK_CREATE } from './nav';
 import { useUI } from '@/store/ui';
 import { useCreate } from '@/store/create';
 import { useAuth } from '@/store/auth';
 import { tasksApi } from '@/api/crm';
 import { Avatar, CountBadge } from '@/components/ui/primitives';
+import { ChangePasswordDialog } from '@/features/auth/ChangePasswordDialog';
 
 // §3.2 TopBar：Logo / CommandPalette 触发 / QuickCreate / 通知 / 帮助 / 用户
 // ♻️ 不再有任何常驻营销组件
@@ -20,6 +21,7 @@ export function TopBar() {
   const clearAuth = useAuth((s) => s.clear);
   const [quickOpen, setQuickOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
+  const [pwdOpen, setPwdOpen] = useState(false);
 
   const logout = () => {
     clearAuth();
@@ -117,6 +119,12 @@ export function TopBar() {
                 </div>
               </div>
               <button
+                onMouseDown={() => setPwdOpen(true)}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text hover:bg-bg"
+              >
+                <KeyRound size={15} className="text-text-weak" /> 修改密码
+              </button>
+              <button
                 onMouseDown={logout}
                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-danger hover:bg-bg"
               >
@@ -125,6 +133,7 @@ export function TopBar() {
             </div>
           )}
         </div>
+        {pwdOpen && <ChangePasswordDialog onClose={() => setPwdOpen(false)} />}
       </div>
     </header>
   );

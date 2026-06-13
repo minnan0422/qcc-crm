@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, FileDown, Plus, Send, Trash2 } from 'lucide-react';
-import { productsApi, quotationsApi } from '@/api/crm';
+import { approvalsApi, productsApi, quotationsApi } from '@/api/crm';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button, Card, CardHeader } from '@/components/ui/primitives';
 import { MoneyText } from '@/components/ui/MoneyText';
@@ -113,7 +113,17 @@ export function QuotationEditorPage() {
         extra={
           <>
             <Button onClick={() => toast('已导出 PDF', 'success')}><FileDown size={14} />导出PDF</Button>
-            <Button onClick={() => toast(calc.needApproval ? '折扣超限，已提交审批' : '已提交', calc.needApproval ? 'info' : 'success')}>
+            <Button
+              onClick={async () => {
+                if (isNew) return toast('请先保存报价单再提交审批', 'info');
+                try {
+                  await approvalsApi.submit({ businessType: 1, businessId: Number(id), businessName: existing?.code ?? `报价单 ${id}` });
+                  toast(calc.needApproval ? '折扣超限，已提交审批流' : '已提交审批流', 'success');
+                } catch (e) {
+                  toast(e instanceof Error ? e.message : '提交失败', 'error');
+                }
+              }}
+            >
               <Send size={14} />提交审批
             </Button>
             <Button variant="primary" onClick={() => { toast('已生成合同并继承全部行项目', 'success'); navigate('/contracts'); }}>

@@ -1,14 +1,19 @@
 // 认证 API：VITE_API_BASE 已定义走真实后端，否则用内存 Mock（演示）。
 import type { AuthUser, Session } from '@/store/auth';
+import { useAuth } from '@/store/auth';
 import { MOCK_USERS } from '@/mock/org';
 
 const BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
 const USE_API = import.meta.env.VITE_API_BASE !== undefined;
 
-async function call<T>(path: string, body?: unknown): Promise<T> {
+async function call<T>(path: string, body?: unknown, method?: 'GET' | 'POST'): Promise<T> {
+  const token = useAuth.getState().accessToken;
   const res = await fetch(`${BASE}/api/auth${path}`, {
-    method: body ? 'POST' : 'GET',
-    headers: { 'Content-Type': 'application/json' },
+    method: method ?? (body ? 'POST' : 'GET'),
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = (await res.json()) as { code: number; msg: string; data: T };
@@ -21,6 +26,9 @@ const backendAuth = {
   login: (username: string, password: string) => call<Session>('/login', { username, password }),
   me: () => call<AuthUser>('/me'),
   wecomUrl: (as?: string) => call<{ url: string; dev: boolean }>(`/wecom/url${as ? `?as=${as}` : ''}`),
+  changePassword: (oldPassword: string, newPassword: string) =>
+    call<Session>('/password', { oldPassword, newPassword }),
+  kick: (userId: number) => call<{ ok: boolean }>(`/kick/${userId}`, {}),
   supportsWecomPopup: true,
 };
 
@@ -52,6 +60,11 @@ const mockAuth = {
   me: async (): Promise<AuthUser> => mockSession(1).user,
   wecomUrl: async () => ({ url: '', dev: true }),
   supportsWecomPopup: false,
+  changePassword: async (_o: string, _n: string): Promise<Session> => {
+    await new Promise((r) => setTimeout(r, 200));
+    return mockSession(useAuth.getState().user?.userId ?? 1);
+  },
+  kick: async (_userId: number) => ({ ok: true }),
   // 仅 mock：直接模拟企业微信扫码登录
   mockWecomLogin: async (): Promise<Session> => {
     await new Promise((r) => setTimeout(r, 400));

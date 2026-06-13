@@ -139,3 +139,37 @@ export const aiApi = {
 export const searchApi = {
   query: (kw: string) => get<SearchHit[]>(`/search?kw=${encodeURIComponent(kw)}`),
 };
+
+// ---- 协同模块 ----
+import type { ApprovalRoute, ApprovalTask, QywxMessage, Sign, Ticket, TicketComment } from '@/types';
+
+export const signApi = {
+  list: (p: ListParams) => list<Sign>('/sign/list', p),
+  create: (input: Partial<Sign>) => post<Sign>('/sign', input),
+};
+
+export const ticketsApi = {
+  list: (p: ListParams) => list<Ticket>('/tickets/list', p),
+  get: (id: number) => get<Ticket>(`/tickets/${id}`),
+  comments: (id: number) => get<TicketComment[]>(`/tickets/${id}/comments`),
+  create: (input: Partial<Ticket>) => post<Ticket>('/tickets', input),
+  updateStatus: (id: number, status: number) => put<Ticket>(`/tickets/${id}/status`, { status }),
+  addComment: (id: number, content: string) => post<TicketComment>(`/tickets/${id}/comments`, { content }),
+};
+
+export const approvalsApi = {
+  routes: (businessType?: number) =>
+    get<ApprovalRoute[]>(`/approvals/routes${businessType ? `?businessType=${businessType}` : ''}`),
+  submit: (input: { businessType: number; businessId: number; businessName?: string; routeId?: number }) =>
+    post<ApprovalTask>('/approvals/submit', input),
+  mine: (p: ListParams) => list<ApprovalTask>('/approvals/mine', p),
+  initiated: (p: ListParams) => list<ApprovalTask>('/approvals/initiated', p),
+  get: (taskId: number) => get<ApprovalTask>(`/approvals/${taskId}`),
+  approve: (taskId: number, comment?: string) => post(`/approvals/${taskId}/approve`, { comment }),
+  reject: (taskId: number, comment?: string) => post(`/approvals/${taskId}/reject`, { comment }),
+};
+
+export const qywxApi = {
+  list: (p: ListParams) => list<QywxMessage>('/qywx/list', p),
+  send: (toUserId: number | null, content: string) => post('/qywx/send', { toUserId, content }),
+};

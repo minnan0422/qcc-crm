@@ -7,6 +7,8 @@ UPDATE app_user SET
 WHERE user_id BETWEEN 1 AND 8;
 
 UPDATE app_user SET username='admin',    email_login='admin@qcc.com',    wecom_userid='WECOM_admin'    WHERE user_id=1;
+-- admin 赋予管理员角色（scope=4，可踢人/全公司数据范围）
+INSERT INTO user_role (user_id, role_id) VALUES (1,3) ON CONFLICT DO NOTHING;
 UPDATE app_user SET username='lina',     email_login='lina@qcc.com',     wecom_userid='WECOM_lina'     WHERE user_id=2;
 UPDATE app_user SET username='wangfang', email_login='wangfang@qcc.com', wecom_userid='WECOM_wangfang' WHERE user_id=3;
 UPDATE app_user SET username='liuyang',  email_login='liuyang@qcc.com',  wecom_userid='WECOM_liuyang'  WHERE user_id=4;

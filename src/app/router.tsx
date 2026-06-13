@@ -22,6 +22,10 @@ import { ActivityAnalyticsPage } from '@/features/analytics/ActivityAnalyticsPag
 import { ProductsPage } from '@/features/settings/ProductsPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { PlaceholderPage } from '@/features/settings/PlaceholderPage';
+import { SignPage } from '@/features/collab/SignPage';
+import { TicketsPage } from '@/features/collab/TicketsPage';
+import { ApprovalsPage } from '@/features/collab/ApprovalsPage';
+import { QywxPage } from '@/features/collab/QywxPage';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -56,10 +60,10 @@ export const router = createBrowserRouter([
       { path: 'settings/products', element: <ProductsPage /> },
       { path: 'settings', element: <SettingsPage /> },
       { path: 'settings/company', element: <PlaceholderPage title="企业工商" /> },
-      { path: 'sign', element: <PlaceholderPage title="外勤签到" /> },
-      { path: 'tickets', element: <PlaceholderPage title="工单" /> },
-      { path: 'approvals', element: <PlaceholderPage title="审批" /> },
-      { path: 'qywx', element: <PlaceholderPage title="企微协同" /> },
+      { path: 'sign', element: <SignPage /> },
+      { path: 'tickets', element: <TicketsPage /> },
+      { path: 'approvals', element: <ApprovalsPage /> },
+      { path: 'qywx', element: <QywxPage /> },
       { path: '*', element: <PlaceholderPage title="页面不存在" /> },
         ],
       },

@@ -43,7 +43,8 @@ async function findByWecom(wecomId: string) {
 
 function issue(u: any) {
   const au: AuthUser = { userId: u.user_id, orgId: u.organization_id, name: u.name };
-  return { accessToken: signAccess(au), refreshToken: signRefresh(u.user_id), user: publicUser(u) };
+  const tv = Number(u.token_version ?? 0);
+  return { accessToken: signAccess(au, tv), refreshToken: signRefresh(u.user_id, tv), user: publicUser(u) };
 }
 
 // 账号密码登录
@@ -84,6 +85,7 @@ authRouter.post(
       if (p.typ !== 'refresh') throw new Error('bad');
       const u = await findById(Number(p.sub));
       if (!u || u.status !== 1) throw new Error('inactive');
+      if (Number(p.tv ?? 0) !== Number(u.token_version ?? 0)) throw new Error('revoked');
       ok(res, issue(u));
     } catch {
       return fail(res, '刷新令牌无效', 1, 401);
@@ -92,6 +94,47 @@ authRouter.post(
 );
 
 authRouter.post('/logout', (_req, res) => ok(res, { ok: true })); // 无状态：前端清除令牌即可
+
+// 修改密码：校验旧密码 → 更新 hash 并 token_version+1（其它会话立即失效）→ 重新签发
+const pwdSchema = z.object({ oldPassword: z.string().min(1), newPassword: z.string().min(6) });
+authRouter.post(
+  '/password',
+  requireAuth,
+  ah(async (req, res) => {
+    const parsed = pwdSchema.safeParse(req.body);
+    if (!parsed.success) return fail(res, '新密码至少 6 位');
+    const uid = (req as any).user.userId as number;
+    const u = await findById(uid);
+    if (!u?.password_hash || !(await bcrypt.compare(parsed.data.oldPassword, u.password_hash)))
+      return fail(res, '原密码错误', 1, 401);
+    const hash = await bcrypt.hash(parsed.data.newPassword, 10);
+    const updated = await one<any>(
+      `UPDATE app_user SET password_hash=$1, token_version=token_version+1 WHERE user_id=$2 RETURNING *`,
+      [hash, uid],
+    );
+    const u2 = await findById(updated.user_id);
+    ok(res, issue(u2)); // 返回新令牌，当前设备保持登录
+  }),
+);
+
+// 强制下线（踢人）：管理员将目标用户 token_version+1，其所有令牌立即失效
+authRouter.post(
+  '/kick/:userId',
+  requireAuth,
+  ah(async (req, res) => {
+    const me = (req as any).user.userId as number;
+    const admin = await one<{ is_admin: boolean }>(
+      `SELECT EXISTS(SELECT 1 FROM user_role ur JOIN role r ON r.role_id=ur.role_id
+         WHERE ur.user_id=$1 AND r.scope=4) AS is_admin`,
+      [me],
+    );
+    if (!admin?.is_admin) return fail(res, '无权限（需管理员）', 1, 403);
+    const target = Number(req.params.userId);
+    const r = await one(`UPDATE app_user SET token_version=token_version+1 WHERE user_id=$1 RETURNING user_id`, [target]);
+    if (!r) return fail(res, '用户不存在', 1, 404);
+    ok(res, { ok: true, userId: target });
+  }),
+);
 
 // ---------- 企业微信 SSO ----------
 // 返回扫码登录 URL（未配置企业凭据时进入开发模拟）
