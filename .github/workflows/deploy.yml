@@ -39,3 +39,13 @@ jobs:
             -t ${IMAGE_NAME}:${IMAGE_TAG} \
             -t ${IMAGE_NAME}:latest \
             .
+
+      - name: Run Docker container
+        run: |
+          # 停止并移除已有同名容器，避免 80 端口占用
+          docker rm -f ${IMAGE_NAME} 2>/dev/null || true
+          docker run -d \
+            --name ${IMAGE_NAME} \
+            --restart unless-stopped \
+            -p 80:80 \
+            ${IMAGE_NAME}:${IMAGE_TAG}
